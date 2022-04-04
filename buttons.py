@@ -1,54 +1,65 @@
 from tkinter import * # type: ignore
 from PIL import ImageTk, Image
+from game_actions import GameActions
 
 
 class Buttons:
-  def __init__(self, window, bombs, side_numbers_count, empty_squares) -> None:
+  def __init__(self, window, bombs, bombs_side_numbers, empty_squares) -> None:
     self.window = window
-    self.bombs_coordinates = bombs
-    self.side_numbers_count = side_numbers_count
+    self.bombs_list_numbers = bombs
+    self.bombs_side_numbers = bombs_side_numbers
     self.empty_squares = empty_squares
     self.side_empties = []
     self.side_numbers = []
+    self.removed_buttons = []
 
 
   def create_button(self, number) -> None:
-    def handle_click(number) -> None:
+    def handle_click(self, number) -> None:
       myButton.destroy()
-      if number in self.bombs_coordinates:
-        print('Perdeu!')
-        img = ImageTk.PhotoImage(Image.open('icons8-naval-mine-25.png')) # type: ignore
-        myLabel = Label(self.window, image=img)
-        myLabel.image = img # type: ignore
-        myLabel.grid(row=number//9 , column=number%9)
-        myLabel.columnconfigure(number, weight=1)
-        myLabel.rowconfigure(number, weight=1)
-      elif number in self.side_numbers_count:
-        myLabel = Label(self.window, text=f'{self.side_numbers_count[number]} ', borderwidth=4, relief="sunken")
-        myLabel.grid(row=number//9 , column=number%9)
-        myLabel.columnconfigure(number, weight=1)
-        myLabel.rowconfigure(number, weight=1)
+      self.removed_buttons.append(myButton._name) # type: ignore
+      if number in self.bombs_list_numbers:
+          bomb_name_list = list(map(lambda number: f"myButton{number}", self.bombs_list_numbers))
+          GameActions.bomb_click(self , self.window, number, bomb_name_list)
+
+      elif number in self.bombs_side_numbers:
+          GameActions.create_label(self, self.window, number, self.bombs_side_numbers[number])
+
       else:
         self.side_empty_list(number)
         for item in self.side_empties:
+          button_name = f'myButton{item}'
+          if button_name not in self.removed_buttons:
+            self.removed_buttons.append(button_name)
+            index = self.find_button_position(button_name)
+
+            self.window.winfo_children()[index].destroy()
+
+          GameActions.create_label(self, self.window, item, 'empty')
           Buttons.side_empty_list(self, item)
-          myLabel = Label(self.window, text='  ', borderwidth=4, relief="sunken")
-          myLabel.grid(row=item//9 , column=item%9)
-          myLabel.columnconfigure(item, weight=1)
-          myLabel.rowconfigure(item, weight=1)
+
         for item in self.side_numbers:
-          myLabel = Label(self.window, text=f'{self.side_numbers_count[item]}', borderwidth=4, relief="sunken")
-          myLabel.grid(row=item//9 , column=item%9)
-          myLabel.columnconfigure(item, weight=1)
-          myLabel.rowconfigure(item, weight=1)
+          GameActions.create_label(self, self.window, item, self.bombs_side_numbers[item])
+
+          button_name = f'myButton{item}'
+          if button_name not in self.removed_buttons:
+            self.removed_buttons.append(button_name)
+            index = self.find_button_position(button_name)
+
+            self.window.winfo_children()[index].destroy()
+      if(len(self.removed_buttons) >= 71): print('Ganhou!')
 
 
     # border = Frame(self.window, highlightbackground='blue', highlightthickness=2, padx=20, pady=20)
+
+    img = Image.open('images/button.png') #type:ignore
+    img_resized = ImageTk.PhotoImage(img.resize((40,40), Image.ANTIALIAS)) #type:ignore
     myButton = Button(
-      self.window, text=' ', command=lambda: handle_click(number)
+      self.window, image=img_resized, command=lambda: handle_click(self, number), name=f'myButton{number}'
     )
     myButton.grid(row=number//9 , column=number%9)
-
+    myButton.image = img_resized #type: ignore
+  
 
   def side_empty_list(self, number: int) -> None:
     number_to_coordinate = lambda _number: [_number//9, _number%9]
@@ -60,11 +71,17 @@ class Buttons:
         j = -1
         while j <= 1:
           curent_number = coordinate_to_number([number_coordinate[0] + i, number_coordinate[1] + j])
-          if 0 <= number_coordinate[1] + j <= 8 and curent_number not in self.bombs_coordinates  and (
-            curent_number not in self.side_empties and curent_number not in self.side_numbers_count.keys()
+          if 0 <= number_coordinate[1] + j <= 8 and curent_number not in self.bombs_list_numbers  and (
+            curent_number not in self.side_empties and curent_number not in self.bombs_side_numbers.keys()
             ):
             self.side_empties.append(curent_number)
-          elif curent_number in self.side_numbers_count.keys():
+          elif curent_number in self.bombs_side_numbers.keys() and 0 <= number_coordinate[1] + j <= 8:
             self.side_numbers.append(curent_number)
           j += 1
       i += 1
+
+
+  def find_button_position(self, name: str) -> int or None:
+    names_list: list = list(map(lambda widget: widget._name,self.window.winfo_children()))
+    index = names_list.index(name)
+    return index

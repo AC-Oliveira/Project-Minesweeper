@@ -1,11 +1,8 @@
 from tkinter import * # type: ignore
 from random import randint
-
-from numpy import empty
-
 from buttons import Buttons
 
-class App:
+class App():
   def __init__(self) -> None:
     # Define window and game properties.
     self.window: Tk  = Tk()
@@ -13,14 +10,14 @@ class App:
     self.bombs_side_numbers: dict = {}
     self.empty_squares: list = []
 
-
-  def numbers_to_cordinates(self, numbers_list: list) -> list:
+  @staticmethod
+  def numbers_to_cordinates(numbers_list: list) -> list:
     NINE = 9
     coordinates_list = list(map(lambda number: [number // NINE, number % NINE], numbers_list))
     return coordinates_list
 
-
-  def coordinates_to_numbers(self, cordinates_list: list) -> list:
+  @staticmethod
+  def coordinates_to_numbers(cordinates_list: list) -> list:
     NINE = 9
     numbers_list = list(map(lambda coordinate: coordinate[0] * NINE + coordinate[1],cordinates_list))
 
@@ -28,7 +25,7 @@ class App:
 
 
   def side_numbers_list(self, numbers_list, type='numbers') -> list:
-    coordinates_list = App.numbers_to_cordinates(self, numbers_list)
+    coordinates_list = App.numbers_to_cordinates(numbers_list)
     side_coordinates_list = []
 
     for coordinate in coordinates_list:
@@ -41,14 +38,14 @@ class App:
             if type == 'numbers' and 0 <= coordinate[1] + j <= 8 and currrent_coordinate not in coordinates_list:
               side_coordinates_list.append([coordinate[0]+i, coordinate[1]+j])
 
+            #Essa parte do código não faz nada... estava fazendo uns testes pensei em outra solução e isso acabou ficando
             elif 0 <= coordinate[1] + j <= 8 and coordinate[0] * 9 + coordinate[1] in self.empty_squares:
               side_coordinates_list.append([coordinate[0]+i, coordinate[1]+j])
 
             j += 1
         i += 1
 
-    side_numbers_list = App.coordinates_to_numbers(self, side_coordinates_list)
-    
+    side_numbers_list = App.coordinates_to_numbers(side_coordinates_list)
     return side_numbers_list
 
 
@@ -102,9 +99,10 @@ class App:
     App.side_empty_squares(self)
 
     # App.grid(self)
+    # buttons.side_empty_list(10)
 
     buttons = Buttons(self.window, self.bombs_coordinates, self.bombs_side_numbers, self.empty_squares)
-    # buttons.side_empty_list(10)
+
     n = 0
     while n < 81:
       buttons.create_button(n)
@@ -118,5 +116,5 @@ class App:
     self.window.mainloop()
 
 
-newApp = App()
-newApp.startWindow()
+root = App()
+root.startWindow()
