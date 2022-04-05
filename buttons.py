@@ -1,10 +1,11 @@
+from cgitb import text
 from tkinter import * # type: ignore
 from PIL import ImageTk, Image
 from game_actions import GameActions
 
 
 class Buttons:
-  def __init__(self, window, bombs, bombs_side_numbers, empty_squares) -> None:
+  def __init__(self, window, bombs, bombs_side_numbers, empty_squares, play_button) -> None:
     self.window = window
     self.bombs_list_numbers = bombs
     self.bombs_side_numbers = bombs_side_numbers
@@ -12,6 +13,7 @@ class Buttons:
     self.side_empties = []
     self.side_numbers = []
     self.removed_buttons = []
+    self.game_status = play_button
 
 
   def create_game_buttons(self, number) -> None:
@@ -20,6 +22,11 @@ class Buttons:
       self.removed_buttons.append(myButton._name) # type: ignore
       if number in self.bombs_list_numbers:
           bomb_name_list = list(map(lambda number: f"myButton{number}", self.bombs_list_numbers))
+          img = Image.open('images/dead_face.png') #type:ignore
+          img_resized = ImageTk.PhotoImage(img.resize((60,60), Image.ANTIALIAS)) #type:ignore
+          self.game_status.configure(image=img_resized)
+          self.game_status.image=img_resized
+
           GameActions.bomb_click(self , self.window, bomb_name_list, number)
 
       elif number in self.bombs_side_numbers:
@@ -46,24 +53,27 @@ class Buttons:
                   pass
 
         for item in self.side_numbers:
-          GameActions.create_label(self, self.window, item, self.bombs_side_numbers[item])
-          button_name = f'myButton{item}'
-          # if button_name == f'myButton{number}':
-          if button_name not in self.removed_buttons:
             try:
+                button_name = f'myButton{item}'
                 index = self.find_button_position(button_name)
                 if not isinstance(self.window.winfo_children()[index], Label) and button_name == self.window.winfo_children()[index]._name:
-                    self.removed_buttons.append(button_name)
-                    self.window.winfo_children()[index].destroy()
+                    GameActions.create_label(self, self.window, item, self.bombs_side_numbers[item])
+                    # if button_name == f'myButton{number}':
+                    if button_name not in self.removed_buttons:
+                        self.removed_buttons.append(button_name)
+                        self.window.winfo_children()[index].destroy()
             except ValueError:
                 pass
       #Fix: False positive when the last button clicked is a bomb.
       if(len(self.removed_buttons) >= 71) and number not in self.bombs_list_numbers:
+          img = Image.open('images/sunglasses_face.png') #type:ignore
+          img_resized = ImageTk.PhotoImage(img.resize((60,60), Image.ANTIALIAS)) #type:ignore
+          self.game_status.configure(image=img_resized)
+          self.game_status.image=img_resized
           GameActions.game_won(self , self.window)
 
 
     def handle_button_right_click(event):
-        print(self.empty_squares)
         myButton.destroy()
         Buttons.create_button_by_type(self, handle_left_click, handle_flag_click, number, 'flag')
 

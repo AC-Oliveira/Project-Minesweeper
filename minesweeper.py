@@ -1,6 +1,7 @@
 from tkinter import * # type: ignore
 from random import randint
 from buttons import Buttons
+from PIL import ImageTk, Image
 
 class App():
   def __init__(self) -> None:
@@ -24,7 +25,7 @@ class App():
     return numbers_list
 
 
-  def side_numbers_list(self, numbers_list, type='numbers') -> list:
+  def side_numbers_list(self, numbers_list) -> list:
     coordinates_list = App.numbers_to_cordinates(numbers_list)
     side_coordinates_list = []
     
@@ -35,11 +36,7 @@ class App():
           j = -1
           while j <= 1:
             currrent_coordinate = [coordinate[0] + i, coordinate[1]+j]
-            if type == 'numbers' and 0 <= coordinate[1] + j <= 8 and currrent_coordinate not in coordinates_list:
-              side_coordinates_list.append([coordinate[0]+i, coordinate[1]+j])
-
-            #Essa parte do código não faz nada... estava fazendo uns testes pensei em outra solução e isso acabou ficando
-            elif 0 <= coordinate[1] + j <= 8 and coordinate[0] * 9 + coordinate[1] in self.empty_squares:
+            if 0 <= coordinate[1] + j <= 8 and currrent_coordinate not in coordinates_list:
               side_coordinates_list.append([coordinate[0]+i, coordinate[1]+j])
 
             j += 1
@@ -67,12 +64,11 @@ class App():
 
 
   def random_bombs(self) -> None:
-    #generate bombs in random coordinates
     while len(self.bombs_coordinates) <= 9:
       number = randint(0,80)
       if number not in self.bombs_coordinates:
         self.bombs_coordinates.append(number)
-    print(self.bombs_coordinates)
+    self.bombs_coordinates.sort()
 
 
   def grid(self) -> None:
@@ -93,10 +89,9 @@ class App():
       n += 1
 
 
-  def start_button(self):
+  def start_button(self, event):
     self.window.winfo_children()[1].destroy()
-    print(self.window.winfo_children())
-
+    self.window.winfo_children()[0].destroy()
     self.bombs_coordinates= []
     self.bombs_side_numbers: dict = {}
     self.empty_squares = []
@@ -104,29 +99,26 @@ class App():
     App.startWindow(self)
 
   def startWindow(self) -> None:
-    # frame.pack()
     App.random_bombs(self)
     App.side_numbers_count(self, App.side_numbers_list(self, self.bombs_coordinates))
     App.side_empty_squares(self)
-    if len(self.window.winfo_children()) == 0:
-        play_button = Button(self.window, text='Play Again', command=lambda: App.start_button(self))
-        play_button.grid(row=0,column=1)
+    img = Image.open('images/smiley_face.png') #type:ignore
+    img_resized = ImageTk.PhotoImage(img.resize((60,60), Image.ANTIALIAS)) #type:ignore
+    play_button = Label(self.window, image=img_resized)
+    play_button.grid(row=0,column=1)
+    play_button.bind('<Button-1>', lambda event: self.start_button(event=event))
     game_grid = Label(self.window)
     game_grid.grid(row=1,column=1)
     self.window.columnconfigure(0, weight=1)
     self.window.rowconfigure(0, weight=1)
-    # App.grid(self)
 
-    buttons = Buttons(game_grid, self.bombs_coordinates, self.bombs_side_numbers, self.empty_squares)
+    buttons = Buttons(game_grid, self.bombs_coordinates, self.bombs_side_numbers, self.empty_squares, play_button)
 
     n = 0
     while n < 81:
       buttons.create_game_buttons(n)
       n += 1
-
-    self.window.title('Campo Minado')
-    # self.window.maxsize(280,320)
-    # self.window.minsize(280,320)
+    self.window.title('Minesweeper')
     self.window.mainloop()
 
 
