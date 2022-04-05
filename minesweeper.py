@@ -27,7 +27,7 @@ class App():
   def side_numbers_list(self, numbers_list, type='numbers') -> list:
     coordinates_list = App.numbers_to_cordinates(numbers_list)
     side_coordinates_list = []
-
+    
     for coordinate in coordinates_list:
       i = -1
       while i <= 1:
@@ -72,6 +72,7 @@ class App():
       number = randint(0,80)
       if number not in self.bombs_coordinates:
         self.bombs_coordinates.append(number)
+    print(self.bombs_coordinates)
 
 
   def grid(self) -> None:
@@ -92,24 +93,40 @@ class App():
       n += 1
 
 
+  def start_button(self):
+    print('fui cricado')
+    self.window.winfo_children()[1].destroy()
+    print(self.window.winfo_children())
+
+    self.bombs_coordinates= []
+    self.bombs_side_numbers: dict = {}
+    self.empty_squares = []
+
+    App.startWindow(self)
+
   def startWindow(self) -> None:
+    print('me chamaram')
     # frame.pack()
     App.random_bombs(self)
     App.side_numbers_count(self, App.side_numbers_list(self, self.bombs_coordinates))
     App.side_empty_squares(self)
-
+    if len(self.window.winfo_children()) == 0:
+        play_button = Button(self.window, text='Play Again', command=lambda: App.start_button(self))
+        play_button.grid(row=0,column=1)
+    game_grid = Label(self.window)
+    game_grid.grid(row=1,column=1)
+    self.window.columnconfigure(0, weight=1)
+    self.window.rowconfigure(0, weight=1)
     # App.grid(self)
-    # buttons.side_empty_list(10)
 
-    buttons = Buttons(self.window, self.bombs_coordinates, self.bombs_side_numbers, self.empty_squares)
+    buttons = Buttons(game_grid, self.bombs_coordinates, self.bombs_side_numbers, self.empty_squares)
 
     n = 0
     while n < 81:
-      buttons.create_button(n)
-      self.window.columnconfigure(n, weight=1)
-      self.window.rowconfigure(n, weight=1)
+      buttons.create_game_buttons(n)
       n += 1
 
+    print('grid len',len(game_grid.winfo_children()), 'fchild', game_grid.winfo_children()[-1])
     self.window.title('Campo Minado')
     # self.window.maxsize(280,320)
     # self.window.minsize(280,320)

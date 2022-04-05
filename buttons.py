@@ -14,13 +14,13 @@ class Buttons:
     self.removed_buttons = []
 
 
-  def create_button(self, number) -> None:
-    def handle_click(self, number) -> None:
+  def create_game_buttons(self, number) -> None:
+    def handle_left_click(self, number) -> None:
       myButton.destroy()
       self.removed_buttons.append(myButton._name) # type: ignore
       if number in self.bombs_list_numbers:
           bomb_name_list = list(map(lambda number: f"myButton{number}", self.bombs_list_numbers))
-          GameActions.bomb_click(self , self.window, number, bomb_name_list)
+          GameActions.bomb_click(self , self.window, bomb_name_list, number)
 
       elif number in self.bombs_side_numbers:
           GameActions.create_label(self, self.window, number, self.bombs_side_numbers[number])
@@ -29,37 +29,84 @@ class Buttons:
         self.side_empty_list(number)
         for item in self.side_empties:
           button_name = f'myButton{item}'
+          # Fix: Empty label has no image when clicked.
+          if button_name == f'myButton{number}':
+            GameActions.create_label(self, self.window, item, 'empty')
           if button_name not in self.removed_buttons:
-            self.removed_buttons.append(button_name)
-            index = self.find_button_position(button_name)
-
-            self.window.winfo_children()[index].destroy()
-
-          GameActions.create_label(self, self.window, item, 'empty')
-          Buttons.side_empty_list(self, item)
+              # Fix: Now Flag Label and Question Button aren't removed when a empty space is clicked.
+              # Fix: When button name isn't myButton... a ValueError is raised by index function.
+              try:
+                  index = self.find_button_position(button_name)
+                  if not isinstance(self.window.winfo_children()[index], Label) and button_name == self.window.winfo_children()[index]._name:
+                      self.removed_buttons.append(button_name)
+                      self.window.winfo_children()[index].destroy()
+                      GameActions.create_label(self, self.window, item, 'empty')
+                      Buttons.side_empty_list(self, item)
+              except ValueError:
+                  pass
 
         for item in self.side_numbers:
           GameActions.create_label(self, self.window, item, self.bombs_side_numbers[item])
-
           button_name = f'myButton{item}'
+          # if button_name == f'myButton{number}':
           if button_name not in self.removed_buttons:
-            self.removed_buttons.append(button_name)
-            index = self.find_button_position(button_name)
+            try:
+                index = self.find_button_position(button_name)
+                if not isinstance(self.window.winfo_children()[index], Label) and button_name == self.window.winfo_children()[index]._name:
+                    self.removed_buttons.append(button_name)
+                    self.window.winfo_children()[index].destroy()
+            except ValueError:
+                pass
+      #Fix: False positive when the last button clicked is a bomb.
+      if(len(self.removed_buttons) >= 71) and number not in self.bombs_list_numbers:
+          print('Ganhou!')
+          GameActions.game_won(self , self.window)
 
-            self.window.winfo_children()[index].destroy()
-      if(len(self.removed_buttons) >= 71): print('Ganhou!')
+
+    def handle_button_right_click(event):
+        print(self.empty_squares)
+        myButton.destroy()
+        Buttons.create_button_by_type(self, handle_left_click, handle_flag_click, number, 'flag')
 
 
-    # border = Frame(self.window, highlightbackground='blue', highlightthickness=2, padx=20, pady=20)
+    def handle_flag_click(event):
+      event.widget.destroy()
+      Buttons.create_button_by_type(self, handle_left_click, handle_question_click, number, 'question')
 
-    img = Image.open('images/button.png') #type:ignore
+
+    def handle_question_click(event):
+      event.widget.destroy()
+      Buttons.create_button_by_type(self, handle_left_click, handle_button_right_click, number, 'button')
+
+
+    myButton = Buttons.create_button_by_type(self, handle_left_click, handle_button_right_click, number, 'button')
+
+
+  def create_button_by_type(self, handle_left_click, handle_right_click, number, type):
+    images = {
+      'button': 'images/button.png',
+      'flag': 'images/flag.png',
+      'question': 'images/question_mark.png',
+    }
+
+    img = Image.open(images[type]) #type:ignore
     img_resized = ImageTk.PhotoImage(img.resize((40,40), Image.ANTIALIAS)) #type:ignore
     myButton = Button(
-      self.window, image=img_resized, command=lambda: handle_click(self, number), name=f'myButton{number}'
+      self.window, image=img_resized, command=lambda: handle_left_click(self, number), name=f'myButton{number}'
     )
-    myButton.grid(row=number//9 , column=number%9)
+    if type == 'flag':
+        myButton.destroy()
+        myButton = Label(self.window, image=img_resized, name=f'myButton{number}')
+    if type == 'question':
+        myButton.destroy()
+        myButton = Button(self.window, image=img_resized, command=lambda: handle_left_click(self, number), name=f'myQuesti{number}')
+
+    myButton.bind('<Button-3>', handle_right_click)
+    myButton.grid(row=number//9 + 1, column=number%9 + 1)
     myButton.image = img_resized #type: ignore
-  
+
+    return myButton
+
 
   def side_empty_list(self, number: int) -> None:
     number_to_coordinate = lambda _number: [_number//9, _number%9]
