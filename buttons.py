@@ -70,7 +70,7 @@ class Buttons:
           img_resized = ImageTk.PhotoImage(img.resize((60,60), Image.ANTIALIAS)) #type:ignore
           self.game_status.configure(image=img_resized)
           self.game_status.image=img_resized
-          GameActions.game_won(self , self.window)
+          GameActions.game_won(self , self.window, number)
 
 
     def handle_button_right_click(event):

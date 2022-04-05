@@ -36,7 +36,7 @@ class GameActions:
                 pass
 
 
-    def game_won(self, window):
+    def game_won(self, window, number):
         for child in window.winfo_children():
             if isinstance(child, Label) and 'myButton' in child._name: #type:ignore
                 child_number = int(child._name[8:]) #type: ignore
@@ -45,8 +45,10 @@ class GameActions:
             if isinstance(child, Button):
                 child_number = int(child._name[8:]) #type: ignore
                 child.destroy()
-                if 'myQuesti' in child._name: #type:ignore
+                if 'myQuesti' in child._name and f'{number}' not in child._name: #type:ignore
                     GameActions.create_label(self,window,child_number, 'question')
+                elif 'myQuesti' in child._name and f'{number}' in child._name: #type:ignore
+                    GameActions.create_label(self,window,child_number, 'empty')
                 else:
                     GameActions.create_label(self,window,child_number, 'button')
 
