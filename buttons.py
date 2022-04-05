@@ -59,7 +59,6 @@ class Buttons:
                 pass
       #Fix: False positive when the last button clicked is a bomb.
       if(len(self.removed_buttons) >= 71) and number not in self.bombs_list_numbers:
-          print('Ganhou!')
           GameActions.game_won(self , self.window)
 
 

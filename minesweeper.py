@@ -94,7 +94,6 @@ class App():
 
 
   def start_button(self):
-    print('fui cricado')
     self.window.winfo_children()[1].destroy()
     print(self.window.winfo_children())
 
@@ -105,7 +104,6 @@ class App():
     App.startWindow(self)
 
   def startWindow(self) -> None:
-    print('me chamaram')
     # frame.pack()
     App.random_bombs(self)
     App.side_numbers_count(self, App.side_numbers_list(self, self.bombs_coordinates))
@@ -126,7 +124,6 @@ class App():
       buttons.create_game_buttons(n)
       n += 1
 
-    print('grid len',len(game_grid.winfo_children()), 'fchild', game_grid.winfo_children()[-1])
     self.window.title('Campo Minado')
     # self.window.maxsize(280,320)
     # self.window.minsize(280,320)

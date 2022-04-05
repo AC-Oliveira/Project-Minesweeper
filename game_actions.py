@@ -6,7 +6,7 @@ class GameActions:
         pass
 
     def bomb_click(self, window, bomb_names, number):
-        print('Perdeu!')
+        print('Wasted!')
         GameActions.create_label(self,window,number, 'mine_blow')
         for child in window.winfo_children():
             try:
@@ -35,7 +35,7 @@ class GameActions:
 
 
     def game_won(self, window):
-        print('Ganhou')
+        print('You Win!')
         for child in window.winfo_children():
             if isinstance(child, Label) and 'myButton' in child._name: #type:ignore
                 child_number = int(child._name[8:]) #type: ignore
@@ -48,8 +48,6 @@ class GameActions:
                     GameActions.create_label(self,window,child_number, 'question')
                 else:
                     GameActions.create_label(self,window,child_number, 'button')
-                
-
 
 
     def create_label(self, window, number, image_type):
