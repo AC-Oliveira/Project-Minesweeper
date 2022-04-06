@@ -2,9 +2,6 @@ from tkinter import * # type: ignore
 from PIL import ImageTk, Image
 
 class GameActions:
-    def __init__(self) -> None:
-        pass
-
     def bomb_click(self, window, bomb_names, number):
         GameActions.create_label(self,window,number, 'mine_blow')
         for child in window.winfo_children():

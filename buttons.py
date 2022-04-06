@@ -17,8 +17,11 @@ class Buttons:
 
 
   def create_game_buttons(self, number) -> None:
-    def handle_left_click(self, number) -> None:
+    def handle_left_click(self,number) -> None:
+      myQuestion_clicked_button = list(filter(lambda button: button._name == f'myQuesti{number}',self.window.winfo_children()))
+      if len(myQuestion_clicked_button): myQuestion_clicked_button[0].destroy()
       myButton.destroy()
+
       self.removed_buttons.append(myButton._name) # type: ignore
       if number in self.bombs_list_numbers:
           bomb_name_list = list(map(lambda number: f"myButton{number}", self.bombs_list_numbers))
